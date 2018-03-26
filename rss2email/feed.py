@@ -478,6 +478,7 @@ class Feed (object):
                 ('Message-ID', self._get_message_id(id_)),
                 ('User-Agent', _USER_AGENT),
                 ('X-RSS-Feed', self.url),
+                ('X-RSS-Feed-Name', self.name),
                 ('X-RSS-ID', id_),
                 ('X-RSS-URL', self._get_entry_link(entry)),
                 ('X-RSS-TAGS', self._get_entry_tags(entry)),
@@ -885,6 +886,7 @@ class Feed (object):
         digest['Message-ID'] = '<{}@dev.null.invalid>'.format(_uuid.uuid4())
         digest['User-Agent'] = _USER_AGENT
         digest['X-RSS-Feed'] = self.url
+        digest['X-RSS-Feed-Name'] = self.name
         return digest
 
     def _append_to_digest(self, digest, message):
