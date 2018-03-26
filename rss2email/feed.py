@@ -479,6 +479,7 @@ class Feed (object):
                 ('User-Agent', _USER_AGENT),
                 ('X-RSS-Feed', self.url),
                 ('X-RSS-Feed-Name', self.name),
+                ('X-RSS-Feed-Title', parsed.feed.get('title')),
                 ('X-RSS-ID', id_),
                 ('X-RSS-URL', self._get_entry_link(entry)),
                 ('X-RSS-TAGS', self._get_entry_tags(entry)),
