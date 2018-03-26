@@ -447,6 +447,10 @@ class Feed (object):
                 return default
             raise
 
+    def _get_message_id(self, text):
+        escaped = _re.sub(r'(["\\])', r'\\\1', text)
+        return '<"{}"@dev.null.invalid>'.format(escaped)
+
     def _process_entry(self, parsed, entry):
         id_ = self._get_entry_id(entry)
         # If .trust_guid isn't set, we get back hashes of the content.
@@ -462,14 +466,22 @@ class Feed (object):
         _LOG.debug('not seen {}'.format(id_))
         sender = self._get_entry_email(parsed=parsed, entry=entry)
         subject = self._get_entry_title(entry)
+        try:
+            # TODO: does feedparser support getting more than one of these?
+            # NB: the tag we're after is thr:in-reply-to, but feedparser
+            # changes ":" to "_".
+            ref = self._get_message_id(entry['thr_in-reply-to']['ref'])
+        except KeyError:
+            ref = None
         extra_headers = _collections.OrderedDict((
                 ('Date', self._get_entry_date(entry)),
-                ('Message-ID', '<{}@dev.null.invalid>'.format(_uuid.uuid4())),
+                ('Message-ID', self._get_message_id(id_)),
                 ('User-Agent', _USER_AGENT),
                 ('X-RSS-Feed', self.url),
                 ('X-RSS-ID', id_),
                 ('X-RSS-URL', self._get_entry_link(entry)),
                 ('X-RSS-TAGS', self._get_entry_tags(entry)),
+                ('References', ref),
                 ))
         # remove empty tags, etc.
         keys = {k for k, v in extra_headers.items() if v is None}
