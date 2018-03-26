@@ -486,7 +486,7 @@ class Feed (object):
                 ('References', ref),
                 ))
         # remove empty tags, etc.
-        keys = {k for k, v in extra_headers.items() if v is None}
+        keys = {k for k, v in extra_headers.items() if not v}
         for key in keys:
             extra_headers.pop(key)
         if self.bonus_header:
