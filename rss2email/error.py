@@ -260,6 +260,17 @@ class OPMLReadError (RSS2EmailError):
         super(OPMLReadError, self).__init__(message=message, **kwargs)
 
 
+class NoAuthorizationError (RSS2EmailError):
+    def __init__(self, **kwargs):
+        message = 'you must provide authorization'
+        super(NoAuthorizationError, self).__init__(message=message, **kwargs)
+
+class NoUserError (RSS2EmailError):
+    def __init__(self, **kwargs):
+        message = 'you must provide a user in the REMOTE_USER variable'
+        super(NoAuthorizationError, self).__init__(message=message, **kwargs)
+
+
 class ConfigAlreadyExistsError (FeedsError):
     def __init__(self, feeds=None):
         message = 'configuration file already exists'

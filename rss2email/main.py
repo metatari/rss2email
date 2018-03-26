@@ -145,6 +145,10 @@ def run(*args, **kwargs):
         'file', metavar='PATH', nargs='?',
         help='path for exported OPML (defaults to stdout)')
 
+    cgi_parser = subparsers.add_parser(
+        'cgi', help=_command.cgi.__doc__.splitlines()[0])
+    cgi_parser.set_defaults(func=_command.cgi)
+
     args = parser.parse_args(*args, **kwargs)
 
     if args.verbose:

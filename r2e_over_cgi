@@ -1,0 +1,16 @@
+## Keep certain cgi environment variables, if env_reset is on.
+Defaults     env_keep += "AUTH_TYPE REMOTE_USER"
+
+## You should modify this to suit your requirements.
+Runas_Alias R2E_USERS = alice, bob, eve
+## Alternatively, comment the above and uncomment this to allow anyone except
+## root and users in the wheel or sudo groups to view the config page.
+# Runas_Alias  R2E_USERS = ALL, !root, !%wheel, !%sudo
+
+## This must contain the full path of your r2e executable.
+Cmnd_Alias   R2E = /usr/bin/r2e, /usr/local/bin/r2e
+
+## This must contain the user that your webserver runs as
+User_Alias WEBSERVERS = www, www-data
+
+WEBSERVERS    ALL = (R2E_USERS) NOPASSWD: R2E

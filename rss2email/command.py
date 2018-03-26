@@ -17,6 +17,8 @@
 """rss2email commands
 """
 
+import cgi as _cgi
+import cgitb as _cgitb
 import os as _os
 import re as _re
 import sys as _sys
@@ -176,3 +178,74 @@ def opmlexport(feeds, args):
         '</opml>\n')
     if args.file:
         f.close()
+
+def _render_feeds(feeds):
+    feed_template = '''
+                <tr>
+                    <td><button name="delete" type="submit" value="{feed.name}">Delete</button></td>
+                    <td class="inner">{feed.name}</td>
+                    <td>{feed.url}</td>
+                </tr>'''
+    return ''.join(feed_template.format(feed=feed) for feed in feeds)
+
+def cgi(feeds, args):
+    "Show a config webpage when run as a CGI script."
+    template = '''\
+Content-Type: text/html\r\n\r\n\
+<!doctype html>
+<html>
+    <head>
+        <title>rss2email</title>
+        <style>
+            table {{ border-collapse: collapse; }}
+            td.inner {{ border-left: 1px solid black; border-right: 1px solid black; }}
+            td input {{ width: 100%; box-sizing: border-box; }}
+            th {{ border-bottom: 3px solid black; }} 
+            h1 {{ text-align: center; }}
+            form {{ position: absolute; }}
+        </style>
+    </head>
+    <body>
+        <form method="post">
+            <h1>{user}'s rss2email configuration</h1>
+            <p>{last_action}</p>
+            <table>
+                <tr><th>Action</th><th>Name</th><th>URL</th></tr>
+                {feeds}
+                <tr>
+                    <td><input type="submit" name="add" value="Add"></td>
+                    <td class="inner"><input type="text" name="new-feed-name"></td>
+                    <td><input type="text" name="new-feed-url"></td>
+                </tr>
+            </table>
+        </form>
+    </body>
+</html>
+'''
+    if not _os.environ.get('AUTH_TYPE'):
+        raise _error.NoAuthorizationError()
+    if not _os.environ.get('REMOTE_USER'):
+        raise _error.NoUserError()
+    _cgitb.enable()
+    form = _cgi.FieldStorage()
+    last_action = ''
+    try:
+        if 'add' in form:
+            if 'new-feed-url' not in form:
+                last_action = 'Error: missing feed URL'
+            else:
+                feed_name = form.getfirst('new-feed-name')
+                feed_url = form.getfirst('new-feed-url')
+                feed = feeds.new_feed(name=feed_name, url=feed_url)
+                feeds.save()
+                last_action = 'Added ' + feed.name
+        elif 'delete' in form:
+            feed_name = form.getfirst('delete')
+            feed = feeds[feed_name]
+            feeds.remove(feed)
+            feeds.save()
+            last_action = 'Deleted {} ({})'.format(feed.name, feed.url)
+    except IndexError as err:
+        last_action = 'Error: ' + str(err)
+    print(template.format(user=_os.environ['REMOTE_USER'], feeds=_render_feeds(feeds),
+                          last_action=last_action), end='')

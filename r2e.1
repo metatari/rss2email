@@ -99,6 +99,14 @@ the data from stdin.
 Export all feeds to OPML.  \fI<path>\fR is the file to which the OPML
 data will be written.  If \fI<path>\fR is not given \fBr2e\fR writes
 the data to stdout.
+.TP
+.B cgi
+This is makes rss2email behave as a cgi program, showing a webpage
+which can be used to add and remove feeds.  It is currently designed
+for use only on Unix systems with the 'sudo' program installed,
+although it may work on others, if they can also install 'sudo'.  It
+should be called from a "wrapper" script so that rss2email runs as the
+correct user.  See \fBCGI Configuration\fR for more details.
 .SH "CONFIGURATION"
 The program's behavior can be controlled via the
 $XDG_CONFIG_HOME/rss2email.cfg (see also FILES and ENVIRONMENT
@@ -263,6 +271,19 @@ IMAP port
 connect to the IMAP server using SSL
 .IP imap-mailbox
 where we should store new messages
+.RE
+.SS CGI Configuration (Unix only)
+.RS
+rss2email should come with a sample script 'r2e.cgi', as well as a
+'sudo' configuration file 'r2e_over_cgi'.  You should copy 'r2e.cgi' to
+your webserver's cgi-bin directory and require authentication to access
+it.  Then, copy 'r2e_over_cgi' to your sudoers.d directory, modifying
+it if necessary, and giving it 0440 file permissions. At that point,
+you should be able to visit the script page, which will list available
+feeds as well as allow you to add and remove them.
+
+Note that it should also be possible to use e.g. Apache suEXEC instead
+of sudo, but there is currently no documentation on how to do this.
 .RE
 .SS Miscellaneous
 .RS
