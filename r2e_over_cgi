@@ -1,5 +1,6 @@
 ## Keep certain cgi environment variables, if env_reset is on.
-Defaults     env_keep += "AUTH_TYPE REMOTE_USER"
+Defaults     env_keep += "AUTH_TYPE REMOTE_USER REQUEST_METHOD QUERY_STRING \
+                          CONTENT_TYPE CONTENT_LENGTH"
 
 ## You should modify this to suit your requirements.
 Runas_Alias R2E_USERS = alice, bob, eve
