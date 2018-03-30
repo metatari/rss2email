@@ -228,6 +228,7 @@ def cgi(feeds, args):
     _cgitb.enable()
     form = _cgi.FieldStorage()
     last_action = ''
+    _LOG.debug('Form: {}'.format(form))
     try:
         if 'add' in form:
             if 'new-feed-url' not in form:
@@ -246,5 +247,8 @@ def cgi(feeds, args):
             last_action = 'Deleted {} ({})'.format(feed.name, feed.url)
     except IndexError as err:
         last_action = 'Error: ' + str(err)
-    print(template.format(user=_os.environ['REMOTE_USER'], feeds=_render_feeds(feeds),
+    if last_action:
+        _LOG.info(last_action)
+    print(template.format(user=_os.environ['REMOTE_USER'],
+                          feeds=_render_feeds(feeds),
                           last_action=last_action), end='')
