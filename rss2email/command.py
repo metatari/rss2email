@@ -191,7 +191,6 @@ def _render_feeds(feeds):
 def cgi(feeds, args):
     "Show a config webpage when run as a CGI script."
     template = '''\
-Content-Type: text/html\r\n\r\n\
 <!doctype html>
 <html>
     <head>
