@@ -181,11 +181,18 @@ def opmlexport(feeds, args):
 
 def _render_feeds(feeds):
     feed_template = '''
-                <tr>
-                    <td><button name="delete" type="submit" value="{feed.name}">Delete</button></td>
-                    <td class="inner">{feed.name}</td>
+            <tr>
+                <form method="post">
+                    <td>
+                        <input type="hidden"
+                               name="feed-name" 
+                               value="{feed.name}">
+                        <input type="submit" name="action" value="Delete">
+                    </td>
+                    <td>{feed.name}</td>
                     <td>{feed.url}</td>
-                </tr>'''
+                </form>
+            </tr>'''
     return ''.join(feed_template.format(feed=feed) for feed in feeds)
 
 def cgi(feeds, args):
@@ -197,7 +204,7 @@ def cgi(feeds, args):
         <title>rss2email</title>
         <style>
             table {{ border-collapse: collapse; }}
-            td.inner {{ border-left: 1px solid black; border-right: 1px solid black; }}
+            td + td {{ border-left: 1px solid black; }}
             td input {{ width: 100%; box-sizing: border-box; }}
             th {{ border-bottom: 3px solid black; }} 
             h1 {{ text-align: center; }}
@@ -205,19 +212,23 @@ def cgi(feeds, args):
         </style>
     </head>
     <body>
-        <form method="post">
-            <h1>{user}'s rss2email configuration</h1>
-            <p>{last_action}</p>
-            <table>
-                <tr><th>Action</th><th>Name</th><th>URL</th></tr>
-                {feeds}
-                <tr>
-                    <td><input type="submit" name="add" value="Add"></td>
-                    <td class="inner"><input type="text" name="new-feed-name"></td>
-                    <td><input type="text" name="new-feed-url"></td>
-                </tr>
-            </table>
-        </form>
+        <h1>{user}'s rss2email configuration</h1>
+        <p>{last_action}</p>
+        <table>
+            <tr>
+                <th>Action</th>
+                <th>Name</th>
+                <th>URL</th>
+            </tr>
+            {feeds}
+            <tr>
+                <form method="post">
+                    <td><input type="submit" name="action" value="Add"></td>
+                    <td><input type="text" name="new-feed-name"></td>
+                    <td><input type="url" name="new-feed-url"></td>
+                </form>
+            </tr>
+        </table>
     </body>
 </html>
 '''
@@ -229,8 +240,9 @@ def cgi(feeds, args):
     form = _cgi.FieldStorage()
     last_action = ''
     _LOG.debug('Form: {}'.format(form))
+    action = form.getfirst('action')
     try:
-        if 'add' in form:
+        if action == 'Add':
             if 'new-feed-url' not in form:
                 last_action = 'Error: missing feed URL'
             else:
@@ -239,12 +251,13 @@ def cgi(feeds, args):
                 feed = feeds.new_feed(name=feed_name, url=feed_url)
                 feeds.save()
                 last_action = 'Added ' + feed.name
-        elif 'delete' in form:
-            feed_name = form.getfirst('delete')
+        elif action == 'Delete':
+            feed_name = form.getfirst('feed-name')
             feed = feeds[feed_name]
             feeds.remove(feed)
             feeds.save()
-            last_action = 'Deleted {} ({})'.format(feed.name, feed.url)
+            last_action = 'Deleted {}'.format(feed)
+        # else pass, just list the feeds
     except IndexError as err:
         last_action = 'Error: ' + str(err)
     if last_action:
