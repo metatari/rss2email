@@ -191,6 +191,7 @@ def _render_feeds(feeds):
                     </td>
                     <td>{feed.name}</td>
                     <td>{feed.url}</td>
+                    <td>{feed.to}</td>
                 </form>
             </tr>'''
     return ''.join(feed_template.format(feed=feed) for feed in feeds)
@@ -219,6 +220,7 @@ def cgi(feeds, args):
                 <th>Action</th>
                 <th>Name</th>
                 <th>URL</th>
+                <th>Email</th>
             </tr>
             {feeds}
             <tr>
@@ -226,6 +228,8 @@ def cgi(feeds, args):
                     <td><input type="submit" name="action" value="Add"></td>
                     <td><input type="text" name="new-feed-name"></td>
                     <td><input type="url" name="new-feed-url"></td>
+                    <td><input type="email" name="new-feed-email"
+                               value="{default_to}"></td>
                 </form>
             </tr>
         </table>
@@ -248,7 +252,9 @@ def cgi(feeds, args):
             else:
                 feed_name = form.getfirst('new-feed-name')
                 feed_url = form.getfirst('new-feed-url')
-                feed = feeds.new_feed(name=feed_name, url=feed_url)
+                feed_email = form.getfirst('new-feed-email')
+                feed = feeds.new_feed(name=feed_name, url=feed_url,
+                                      to=feed_email)
                 feeds.save()
                 last_action = 'Added ' + feed.name
         elif action == 'Delete':
@@ -264,4 +270,5 @@ def cgi(feeds, args):
         _LOG.info(last_action)
     print(template.format(user=_os.environ['REMOTE_USER'],
                           feeds=_render_feeds(feeds),
-                          last_action=last_action), end='')
+                          last_action=last_action,
+                          default_to=feeds.config['DEFAULT']['to']), end='')
