@@ -521,6 +521,7 @@ class Feed (object):
                 ('List-ID', '<{}.localhost>'.format(self.name)),
                 ('List-Post', 'NO (posting not allowed on this list)'),
                 ('X-RSS-Feed', self.url),
+                ('X-RSS-Feed-Title', parsed.feed.get('title').strip() or None),
                 ('X-RSS-ID', guid),
                 ('X-RSS-URL', self._get_entry_link(entry)),
                 ('X-RSS-TAGS', self._get_entry_tags(entry)),
