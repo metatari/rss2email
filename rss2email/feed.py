@@ -518,7 +518,7 @@ class Feed (object):
                 ('Message-ID', message_id),
                 ('In-Reply-To', in_reply_to),
                 ('User-Agent', self.user_agent),
-                ('List-ID', '<{}.localhost>'.format(self.name)),
+                ('List-ID', self._get_list_id(parsed.feed)),
                 ('List-Post', 'NO (posting not allowed on this list)'),
                 ('X-RSS-Feed', self.url),
                 ('X-RSS-ID', guid),
@@ -557,6 +557,13 @@ class Feed (object):
             section=self.section)
 
         return guid, new_state, sender, message
+
+    # TODO: should max_title_chars be configurable?
+    def _get_list_id(self, feed, max_title_chars=40):
+        title = feed.get('title').strip()
+        if len(title) > max_title_chars:
+            title = title[:max_title_chars - len('...')] + '...'
+        return _formataddr((title, self.name + '.localhost'))
 
     def _get_uid_for_entry(self, entry) -> str:
         """Get the best UID (unique ID) for the entry."""
