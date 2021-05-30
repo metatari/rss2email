@@ -563,7 +563,11 @@ class Feed (object):
         title = feed.get('title').strip()
         if len(title) > max_title_chars:
             title = title[:max_title_chars - len('...')] + '...'
-        return _formataddr((title, self.name + '.localhost'))
+        addrspec = self.name + '.localhost'
+        if title:
+            return _formataddr((title, addrspec))
+        else:
+            return '<{}>'.format(addrspec)
 
     def _get_uid_for_entry(self, entry) -> str:
         """Get the best UID (unique ID) for the entry."""
